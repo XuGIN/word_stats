@@ -3,6 +3,7 @@ from fastapi.responses import FileResponse
 from app.core.config import settings
 from app.services.analyzer import analyze_file
 from app.services.excel_writer import create_excel_report
+import aiofiles
 import os
 
 router = APIRouter()
@@ -25,9 +26,12 @@ async def process_file(
     temp_path = os.path.join(settings.TEMP_PATH, file.filename)
     temp_path_excel = os.path.join(settings.TEMP_PATH, "result.xlsx")
     try:
-        with open(temp_path, "wb") as f:
-            data = await file.read()
-            f.write(data)
+        async with aiofiles.open(temp_path, "wb") as f:
+            while True:
+                data = await file.read(1024*1024)
+                if not data:
+                    break
+                await f.write(data)
 
         analyzed_file = analyze_file(temp_path)
 
