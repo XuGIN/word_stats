@@ -6,7 +6,3 @@ app = FastAPI()
 app.include_router(report_router)
 
 get_morph()
-
-@app.get("/hello")
-async def check():
-    return {"data": "Hello"}
