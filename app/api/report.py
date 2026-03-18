@@ -6,6 +6,7 @@ from app.services.excel_writer import create_excel_report
 from app.services.validator import validate_file
 import aiofiles
 import os
+import uuid
 
 router = APIRouter()
 
@@ -18,9 +19,11 @@ async def process_file(
     file: UploadFile = File(...),
     background_tasks: BackgroundTasks = None
     ):
-    validate_file(file)
-    temp_path = os.path.join(settings.TEMP_PATH, file.filename)
-    temp_path_excel = os.path.join(settings.TEMP_PATH, "result.xlsx")
+    safe_name = validate_file(file)
+    unique_id = uuid.uuid4().hex
+    temp_filename = f"{unique_id}_{safe_name}"
+    temp_path = os.path.join(settings.TEMP_PATH, temp_filename)
+    temp_path_excel = os.path.join(settings.TEMP_PATH, f"result_{unique_id}.xlsx")
     try:
         async with aiofiles.open(temp_path, "wb") as f:
             while True:
